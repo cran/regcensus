@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>regcensus-api-R</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">regcensus-api-R</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(regcensus)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>RegCensusAPI is an API client that connects to the RegData regulatory
+restrictions data by the Mercatus Center at George Mason University.
+RegData uses machine learning algorithms to quantify the number of
+regulatory restrictions in a jurisdiction. Currently, RegData is
+available for three countries - Australia, Canada, and the United
+States. In addition, there are regulatory restrictions data for
+jurisdictions (provinces in Canada and states in Australia and US)
+within these countries. You can find out more about RegData from <a href="https://www.quantgov.org" class="uri">https://www.quantgov.org</a>.</p>
+<p>This R API client connects to the api located at at the <a href="https://api.quantgov.org/">QuantGov website</a>. More advanced
+users who want to interact with the API directly can use the link above
+to pull data from the RegData API. Python users can access the same
+features provided in this package in the Python package
+<strong>regcensus</strong>.</p>
+<p>We put together a short video tutorial, showing some of the basics of
+the API library. You can view that here.</p>
+</div>
+<div id="installing-and-importing-regcensus" class="section level2">
+<h2>Installing and Importing <strong>RegCensus</strong></h2>
+<p>The RegCensus R library is available on CRAN. To install-</p>
+<pre><code>install.packages(&quot;regcensus&quot;)</code></pre>
+<p>Once installed, import the library, using the following:</p>
+<pre><code>library(regcensus)</code></pre>
+</div>
+<div id="structure-of-the-api" class="section level2">
+<h2>Structure of the API</h2>
+<p>The API organizes data around <strong>document types</strong>, which
+are then divided into <strong>series</strong>. Within each series are
+<strong>values</strong>, which are the ultimate values of interest.
+Values are available by three sub-groups: agency, industry, and
+occupation. Presently, there are no series with occupation subgroup.
+However, these are available for future use. Document types broadly
+define the data available. For example, RegData for regulatory
+restrictions is falls under the broad document type “Regulatory
+Restrictions.” Within Regulatory Restrictions document type, there are a
+number of series available. These include Total Restrictions, Total
+Wordcount, Total “Shall,” etc.</p>
+<p>A fundamental concept in RegData is the “document.” In RegData, a set
+of documents represents a body of regulations for which we have produced
+regulatory restriction counts. For example, to produce data on
+regulatory restrictions imposed by the US Federal government, RegData
+uses the Code of Federal Regulations (CFR) as the source documents.
+Within the CFR, RegData identifies a unit of regulation as the
+title-part combination. The CFR is organized into 50 titles, and within
+each title are parts, which could have subparts, but not always. Under
+the parts are sections. Determining this unit of analyses is critical
+for the context of the data produced by RegData. Producing regulatory
+restriction data for US states follows the same strategy but uses the
+state-specific regulatory code.</p>
+<p>In requesting data through the API, you must specify the document
+type and the indicate a preference for <em>summary</em> or
+<em>document-level</em>. By default, RegCensus API returns summarized
+data for the date of interest. This means that if you do not specify the
+<em>summary</em> preference, you will receive the summarized data for a
+date. The <strong>get_series</strong> helper function (described below)
+returns the dates available for each series.</p>
+<p>RegCensus API defines a number of dates depending on the series. For
+example, the total restrictions series of Federal regulations uses two
+main dates: daily and annual. The daily data produces the number of
+regulatory restrictions issued on a particular date by the US Federal
+government. The same data are available on an annual basis.</p>
+<p>There are five helper functions to retrieve information about these
+key components of regdata. These functions provider the following
+information: document types, jurisdictions, series, agencies, and dates
+with data. The list functions begin with <strong>list</strong>.</p>
+<p>Each document type comprises one or more <em>series</em>. The
+<strong>list_series</strong> function returns the list of all
+series.</p>
+<pre><code>list_series()</code></pre>
+<p>Listing the jurisdictions is another great place to start. If you are
+looking for data for a specifc jurisdiction(s), this function will
+return the jurisdiction_id for all jurisdiction, which is key for
+retrieving data on any individual jurisdiction.</p>
+<p>The <strong>get_series</strong> function returns a list of all series
+and the years with data available for each jurisdiction.</p>
+<p>The output from this function can serve as a reference for the valid
+values that can be passed to parameters in the
+<strong>get_values</strong> function. The number of records returned is
+the unique combination of series and jurisdictions that are available in
+RegData. The function takes the optional argument jurisdiction id.</p>
+</div>
+<div id="metadata" class="section level2">
+<h2>Metadata</h2>
+<p>The __get_*__ functions return the details about RegData metadata.
+These metadata are not included in the <strong>get_values</strong>
+functions that will be described later.</p>
+<div id="jurisdictions" class="section level3">
+<h3>Jurisdictions</h3>
+<p>Use the <strong>get_jurisdiction</strong> function to return a data
+frame with all the jurisdictions. When you supply the jurisdiction ID
+parameter, the function returns the details of just that jurisdiction.
+Use the output from the <strong>get_jurisdiction</strong> function to
+merge with data from the <strong>get_values</strong> function.</p>
+<pre><code>get_jurisdictions()</code></pre>
+</div>
+<div id="datafinder" class="section level3">
+<h3>DataFinder</h3>
+<p>Use the <strong>get_datafinder</strong> function to return a data
+frame for a specific jurisdiction. It returns the following attributes
+in the data -
+<code>[&#39;jurisdiction&#39;, &#39;documentType&#39;, &#39;year&#39;, &#39;series&#39;, &#39;document_endpoints&#39;, &#39;summary_endpoints&#39;, &#39;label_endpoints&#39;]</code></p>
+<pre><code>get_datafinder(jurisdiction = 38)</code></pre>
+</div>
+<div id="agencies" class="section level3">
+<h3>Agencies</h3>
+<p>The <strong>get_agencies</strong> function returns a data frame of
+agencies with data in RegData. Either the <code>jurisdictionID</code> or
+<code>keyword</code> arguments must be supplied. If
+<code>jurisdictionID</code> is passed, the data frame will include
+information for all agencies in that jurisdiction. If
+<code>keyword</code> is supplied, the data frame will include
+information for all agencies whose name contains the keyword.</p>
+<p>The following code snippet will return data for all agencies in the
+Federal United States:</p>
+<pre><code>get_agencies(jurisdiction_id = 38)</code></pre>
+<p>Likewise, this code snippet will return data for all agencies (in any
+jurisdiction) containing the word “education” (not case sensitive):</p>
+<pre><code>get_agencies(keyword = &#39;education&#39;)</code></pre>
+<p>Use the value of the agency_id field when pulling values with the
+<strong>get_values</strong> function.</p>
+</div>
+<div id="industries" class="section level3">
+<h3>Industries</h3>
+<p>The <strong>get_industries</strong> function returns a data frame of
+industries with data in the API. The available standards include the
+North American Industry Classification System (NAICS), the Bereau of
+Economic Analysis system (BEA), and the Standard Occupational
+Classification System (SOC). By default, the function only returns a
+data frame with 3-digit NAICS industries. The <code>codeLevel</code> and
+<code>standard</code> arguments can be used to select from other
+classifications.</p>
+<p>The following line will get you industry information for all 4-digit
+NAICS industries:</p>
+<pre><code>get_industries(label_level = 4)</code></pre>
+<p>This line will get you information for the NAICS industries:</p>
+<pre><code>get_industries(label_source = &#39;NAICS&#39;)</code></pre>
+<p>Like the <strong>get_agencies</strong> function, the
+<code>keyword</code> argument may also be used. The following code
+snippet will return information for all 6-digit NAICS industries with
+the word “fishing” in the name:</p>
+<pre><code>get_industries(keyword = &#39;fishing&#39;, label_level = 6)</code></pre>
+</div>
+</div>
+<div id="values" class="section level2">
+<h2>Values</h2>
+<p>The <strong>get_values</strong> function is the primary function for
+obtaining RegData from the RegCensus API. The function takes the
+following parameters:</p>
+<ul>
+<li>jurisdiction (required) - value or list of jurisdiction IDs</li>
+<li>series (required) - value or list of series IDs</li>
+<li>year (required) - value or list of years</li>
+<li>agency (optional) - value or list of agencies</li>
+<li>industry (optional) - value of list of agencies</li>
+<li>dateIsRange (optional) - specify if the list of years provided for
+the parameter years is a range. Default is True.</li>
+<li>filtered (optional) - specify if poorly-performing industry results
+should be excluded. Default is True.</li>
+<li>summary (optional) - specify if summary results should be returned,
+instead of document-level results. Default is True.</li>
+<li>country (optional) - specify if all values for a country’s
+jurisdiction ID should be returned. Default is False.</li>
+<li>industryLevel (optional): level of NAICS industries to include.
+Default is 3.</li>
+<li>version (optional): Version ID for datasets with multiple versions,
+if no ID is given, API returns most recent version</li>
+<li>download (optional): if not False, a path location for a downloaded
+csv of the results.</li>
+<li>verbose (optional) - value specifying how much debugging information
+should be printed for each function call. Higher number specifies more
+information, default is 0.</li>
+</ul>
+<p>In the example below, we are interested in the total number of
+restrictions and total number of words for the US
+(get_jurisdictions(38)) for the dates 2010 to 2019.</p>
+<pre><code>get_values(series = array(c(1,2)), jurisdiction = 38, year = array(c(2010, 2019)))</code></pre>
+<div id="get-all-values-for-a-country" class="section level3">
+<h3>Get all Values for a Country</h3>
+<p>The <code>country</code> argument can be used to get all values for
+one or multiple series for a specific national jurisdiction. The
+following line will get you a summary of the national and state-level
+restriction counts for the United States from 2016 to 2019 (this
+function is temporarily disabled as of 1.0.0):</p>
+<pre><code>get_values(series = 1, jurisdiction = 38, year = array(c(2016, 2019)), country=TRUE)</code></pre>
+</div>
+<div id="values-by-subgroup" class="section level3">
+<h3>Values by Subgroup</h3>
+<p>You can obtain data for any of the three subgroups for each series -
+agencies, industries, and occupations (when they become available).</p>
+<div id="values-by-agencies" class="section level4">
+<h4>Values by Agencies</h4>
+<p>To obtain the restrictions for a specific agency (or agencies), the
+series id supplied must be in the list of available series by agency. To
+recap, the list of available series for an agency is available via the
+<strong>list_series</strong> function, and the list of agencies with
+data is available via <strong>get_agencies</strong> function.</p>
+<pre><code># Identify all agencies
+list_agencies(jurisdiction_id=38)
+
+# Call the get_values() for two agencies and series 13
+get_values(series = 13, jurisdiction = 38, year = array(c(2000, 2018)), agency = array(c(15918, 15921)))</code></pre>
+</div>
+<div id="values-by-agency-and-industry" class="section level4">
+<h4>Values by Agency and Industry</h4>
+<p>Some agency series may also have data by industry. For example, under
+the Total Restrictions topic, RegData includes the industry-relevant
+restrictions, which estimates the number of restrictions that apply to a
+given industry. These are available in both the main series - Total
+Restrictions, and the sub-group Restrictions by Agency.</p>
+<p>Valid values for industries include the industry codes specified in
+the classification system obtained by calling the
+<strong>get_industries(jurisdiction)</strong> function.</p>
+<p>In the example below, for the below series, we can request data for
+the two industries 111 and 33 by the following code snippet.</p>
+<pre><code>get_values(series = array(c(1,28,33,36)), jurisdiction = 38, year = array(c(1990, 2000)), label = 111, agency = 0)</code></pre>
+</div>
+</div>
+<div id="document-level-values" class="section level3">
+<h3>Document-Level Values</h3>
+<p>For most use-cases, our summary-level data will be enough. However,
+document-level data is also available, though most of these queries take
+much longer to return results. Multi-year and industry results for
+jurisdiction 38 will especially take a long time. If you want the full
+dataset for United States Federal, consider using our bulk downloads,
+available at the <a href="https://www.quantgov.org/download-interactively">QuantGov
+website</a>.</p>
+<p>We can request the same data from above, but at the document level,
+using the following code snippet.</p>
+<pre><code>get_values(series = array(c(1,2)), jurisdiction = 38, year = 2020, summary=FALSE)</code></pre>
+<p>Alternatively, we can use the <strong>get_document_values</strong>
+function as in the following code snippet.</p>
+<pre><code>get_document_values(series = array(c(1,2)), jurisdiction = 38, year = 2019)</code></pre>
+<p>See the <strong>get_series</strong> function for specifics by
+jurisdiction.</p>
+</div>
+<div id="version" class="section level3">
+<h3>Version</h3>
+<p><em>This currently applies to the RegData U.S. Annual project
+only.</em></p>
+<p>As of version 0.2.4, a version parameter can be passed to the
+<strong>get_values</strong> function to obtained data from past versions
+of data (currently only for the RegData U.S. Annual project). Available
+versions and their associated versionIDs can be obtained by using the
+<strong>get_version</strong> function. If no version parameter is given,
+the most recent version will be returned. The following code snippet
+will return restrictions data for the 3.2 version of RegData U.S. Annual
+for the years 2010 to 2019.</p>
+<pre><code>get_values(series = 1, jurisdiction = 38, year = array(c(2010, 2019)), version = 1)</code></pre>
+</div>
+<div id="merging-with-metadata" class="section level3">
+<h3>Merging with Metadata</h3>
+<p>To minimize the network bandwidth requirements to use RegCensusAPI,
+the data returned by <strong>get_values</strong> function contain very
+minimal metadata. Once you pull the values by
+<strong>get_values</strong>, you can use the Pandas library to include
+the metadata.</p>
+<p>Suppose we want to attach the agency names and other agency
+characteristics to the data from the last code snippet. First be sure to
+pull the list of agencies into a separate data frame. Then merge with
+the values data frame. The key for matching the data will be the
+<em>agency_id</em> column.</p>
+<p>We can merge the agency data with the values data as in the code
+snippet below.</p>
+<pre><code>agencies &lt;- get_agencies(jurisdiction_id = 38)
+agency_by_industry &lt;- get_values(series = array(c(1,28,33,36)), 
+                                jurisdiction = 38, 
+                                year = array(c(1990, 2000)), 
+                                label = 111, 
+                                agency = 0)
+agency_restrictions_ind = merge(agency_by_industry, agencies, by=&#39;agency_id&#39;)</code></pre>
+</div>
+</div>
+<div id="downloading-data" class="section level2">
+<h2>Downloading Data</h2>
+<p>There are two different ways to download data retrieved from
+RegCensusAPI:</p>
+<ol style="list-style-type: decimal">
+<li><p>Use the <code>write.csv(df, file=outpath)</code> function, which
+allows the user to download a csv of the data, with the given
+outpath.</p></li>
+<li><p>As of version 0.2.0, the <strong>get_values</strong> function
+includes a <code>download</code> argument, which allows the user to
+simply download a csv of the data in the same line as the API call. See
+below for an example of this call.</p></li>
+</ol>
+<pre><code>get_values(series = array(c(1,28,33,36)), jurisdiction = 38, year = array(c(2010, 2019)), download=&#39;regdata2010to2019.csv&#39;)</code></pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
