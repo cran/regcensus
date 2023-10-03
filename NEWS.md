@@ -1,6 +1,6 @@
-## regcensus-api-R 
-================
+# regcensus-api-R 1.0.1
+This is a hotfix release with updated links in description & documentation.
 
-### Version 1.0.0 (Release date: 2023-07-03)
--  First commit, with all the functionalities which our current Python package has.
 
+# regcensus-api-R 1.0.0
+R package having all the functionalities of our current [**`regcensus-api-python`**](https://github.com/QuantGov/regcensus-api-python) package.
